@@ -9,9 +9,9 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields =  ["id", "title", "url", "poster", "createdon", "all_votes"]
 
-
     def get_all_votes(self, obj):
         return Vote.objects.filter(post=obj).count()
+
 
 class VoteSerializer(serializers.ModelSerializer):
     class Meta:
