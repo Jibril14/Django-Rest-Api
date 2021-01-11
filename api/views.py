@@ -5,8 +5,8 @@ from rest_framework import generics, permissions, mixins, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from .models import Post, Vote
-from .serializers import PostSerializer, VoteSerializer
-
+from .serializers import PostSerializer, VoteSerializer, UpdatePostSerializer
+from django.utils import timezone
 
 class postlist(generics.ListCreateAPIView):
    queryset = Post.objects.all()
@@ -49,3 +49,16 @@ class PostRetrieveDestroy(generics.RetrieveDestroyAPIView):
          return self.destroy(request, *args, **kwargs)
       else:
          raise ValidationError("This is not Your post to delete!")
+
+
+class UpdatePostView(generics.UpdateAPIView):
+   serializer_class = UpdatePostSerializer
+   permission_classes = [permissions.IsAuthenticated]
+
+   def  get_queryset(self):
+      current_user = self.request.user
+      return Post.objects.filter(poster=current_user)
+
+   def perform_update(self, serializer):
+      serializer.instance.datecompleted = timezone.now()
+      serializer.save()

@@ -17,3 +17,12 @@ class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
         fields = ["id"]
+
+
+class UpdatePostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields =  ["title", "url"]
+        read_only_fields = ["id", "createdon", "poster"]
+
+ 
