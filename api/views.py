@@ -7,6 +7,12 @@ from rest_framework.response import Response
 from .models import Post, Vote
 from .serializers import PostSerializer, VoteSerializer, UpdatePostSerializer
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.parsers import JSONParser
+from django.http import JsonResponse
+from django.db import IntegrityError
+from django.contrib.auth.models import User
+
 
 class postlist(generics.ListCreateAPIView):
    queryset = Post.objects.all()
@@ -62,3 +68,15 @@ class UpdatePostView(generics.UpdateAPIView):
    def perform_update(self, serializer):
       serializer.instance.datecompleted = timezone.now()
       serializer.save()
+
+
+@csrf_exempt
+def signUpView(request):
+   if request.method =="POST":
+      try:
+         data = JSONParser().parse(request)
+         user = User.objects.create_user(data["username"], password=data["password"])
+         user.save()
+         return JsonResponse({"token":"abcdefg"}, status=201)
+      except IntegrityError:
+         return JsonResponse({"error":"This Username Already Exist!"})
