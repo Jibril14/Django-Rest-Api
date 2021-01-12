@@ -12,7 +12,7 @@ from rest_framework.parsers import JSONParser
 from django.http import JsonResponse
 from django.db import IntegrityError
 from django.contrib.auth.models import User
-
+from rest_framework.authtoken.models import Token
 
 class postlist(generics.ListCreateAPIView):
    queryset = Post.objects.all()
@@ -77,6 +77,8 @@ def signUpView(request):
          data = JSONParser().parse(request)
          user = User.objects.create_user(data["username"], password=data["password"])
          user.save()
-         return JsonResponse({"token":"abcdefg"}, status=201)
+         token = Token.objects.create(user=user)
+         return JsonResponse({"token":str(token)}, status=201)
       except IntegrityError:
          return JsonResponse({"error":"This Username Already Exist!"})
+
