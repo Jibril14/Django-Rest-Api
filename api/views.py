@@ -13,10 +13,13 @@ from django.http import JsonResponse
 from django.db import IntegrityError
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
+
 
 class postlist(generics.ListCreateAPIView):
    queryset = Post.objects.all()
    serializer_class = PostSerializer
+   permission_classes = [permissions.IsAuthenticated]
 
    def perform_create(self, serializer):
       serializer.save(poster=self.request.user)
@@ -80,5 +83,17 @@ def signUpView(request):
          token = Token.objects.create(user=user)
          return JsonResponse({"token":str(token)}, status=201)
       except IntegrityError:
-         return JsonResponse({"error":"This Username Already Exist!"})
+         return JsonResponse({"error":"This Username Already Exist!"}, status=400)
 
+
+@csrf_exempt
+def loginView(request):
+   if request.method =="POST":
+      
+         data = JSONParser().parse(request)
+         user = authenticate(request, username=data["username"], password=data["password"])
+         if user is None:
+            return JsonResponse({"erroe":"No match Username or password"}, status=201)
+         else:
+            token = Token.objects.create(user=user)
+         return JsonResponse({"token":str(token)}, status=200)
